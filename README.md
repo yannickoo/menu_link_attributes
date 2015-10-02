@@ -15,7 +15,7 @@
 
    Note that *label* and *description* are optional information.
 3. Save configuration
-4. Edit menu link and att attributes
+4. Edit menu link and add attributes
 
 ## Contributing
 
