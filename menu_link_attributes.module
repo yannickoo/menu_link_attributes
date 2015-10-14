@@ -13,7 +13,7 @@ use Drupal\Component\Utility\Unicode;
  * Implements hook_form_FORM_ID_alter().
  */
 function menu_link_attributes_form_menu_link_content_menu_link_content_form_alter(&$form, FormStateInterface $form_state) {
-  $attributes = \Drupal::config('menu_link_attributes.config')->get('attributes');
+  $attributes = \Drupal::config('menu_link_attributes.config')->get('attributes') ?: [];
   $menu_link_manager = \Drupal::service('plugin.manager.menu.link');
   $menu_link = $form_state->getFormObject()->getEntity();
   $menu_link_attributes = [];
@@ -21,7 +21,8 @@ function menu_link_attributes_form_menu_link_content_menu_link_content_form_alte
   // Try to load plugin definition for getting attributes.
   try {
     $definition = $menu_link_manager->createInstance($menu_link->getPluginId());
-    $menu_link_attributes =  $definition->getOptions()['attributes'] ?: [];
+    $menu_link_options =  $definition->getOptions();
+    $menu_link_attributes = isset($menu_link_options['attributes']) ? $menu_link_options['attributes'] : [];
   }
   catch (PluginNotFoundException $e) {}
 
