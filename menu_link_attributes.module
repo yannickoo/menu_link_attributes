@@ -8,6 +8,7 @@
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Component\Plugin\Exception\PluginNotFoundException;
 use Drupal\Component\Utility\Unicode;
+use Drupal\Core\Url;
 
 /**
  * Implements hook_form_FORM_ID_alter().
@@ -33,6 +34,29 @@ function menu_link_attributes_form_menu_link_content_menu_link_content_form_alte
     '#tree' => TRUE,
   ];
 
+  $config_path = Url::fromRoute('menu_link_attributes.config')->toString();
+  $referrer_path = parse_url(\Drupal::request()->headers->get('referer'))['path'];
+  $coming_from_config = $config_path == $referrer_path;
+
+  // Open <details> element if coming from config page.
+  if ($coming_from_config) {
+    $form['attributes']['#open'] = TRUE;
+  }
+
+  $destination = \Drupal::destination()->getAsArray();
+  $config_path = Url::fromRoute('menu_link_attributes.config', [], ['query' => $destination])->toString();
+
+  if (count($attributes)) {
+    $form['attributes']['#description'] = '<small>' . t('Manage available attributes <a href="@config">here</a>.', ['@config' => $config_path]) . '</small>';
+  }
+  else {
+    $form['attributes']['help'] = [
+      '#markup' => t('Manage available attributes <a href="@config">here</a>.', ['@config' => $config_path])
+    ];
+  }
+
+  $autofocus = FALSE;
+
   // Iterate all defined attributes and create text field for them.
   foreach ($attributes as $attribute => $info) {
     // Provide default label / description for attributes.
@@ -49,6 +73,13 @@ function menu_link_attributes_form_menu_link_content_menu_link_content_form_alte
       '#description' => $info['description'],
       '#default_value' => isset($menu_link_attributes[$attribute]) ? $menu_link_attributes[$attribute] : '',
     ];
+
+    // Add "autofocus" attribute for first attribute input field
+    // if coming from config page.
+    if ($coming_from_config && !$autofocus) {
+      $form['attributes'][$attribute]['#attributes'] = ['autofocus' => 'autofocus'];
+      $autofocus = TRUE;
+    }
   }
 
   $form['actions']['submit']['#submit'][] = 'menu_link_attributes_menu_link_content_form_submit';
