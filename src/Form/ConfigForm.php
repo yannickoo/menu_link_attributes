@@ -9,6 +9,8 @@ namespace Drupal\menu_link_attributes\Form;
 
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Component\Serialization\Exception\InvalidDataTypeException;
+use Drupal\Component\Serialization\Yaml;
 
 /**
  * Class ConfigForm.
@@ -38,15 +40,38 @@ class ConfigForm extends ConfigFormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $config = $this->config('menu_link_attributes.config');
-    $attributes_text = $config->get('attributes') ?: [];
-    $attributes = menu_link_attributes_split($attributes_text);
+    $conf = $config->get();
+    $config_text = Yaml::encode($conf);
 
-    $form['attributes'] = array(
+    $form['config'] = array(
       '#type' => 'textarea',
-      '#title' => $this->t('Attributes'),
-      '#description' => $this->t('Enter one attribute per line in <code>attribute|label|description</code> format. Label and description are optional.'),
-      '#default_value' => $attributes,
+      '#title' => $this->t('Configuration'),
+      '#description' => $this->t('Available attributes can be defined in YAML syntax.'),
+      '#default_value' => $config_text,
+      '#rows' => 15,
+      '#attributes' => ['data-yaml-editor' => 'true'],
     );
+
+    // Use module's YAML config file for example structure.
+    $module_path = \Drupal::moduleHandler()->getModule('menu_link_attributes')->getPath();
+    $yml_text = file_get_contents($module_path . '/config/install/menu_link_attributes.config.yml');
+
+    $form['example'] = [
+      '#type' => 'details',
+      '#title' => $this->t('Example structure'),
+    ];
+
+    $form['example']['description'] = [
+      '#prefix' => '<p>',
+      '#suffix' => '</p>',
+      '#markup' => $this->t('Each attribute has an optional label and description.')
+    ];
+
+    $form['example']['code'] = [
+      '#prefix' => '<pre>',
+      '#suffix' => '</pre>',
+      '#markup' => $yml_text,
+    ];
 
     return parent::buildForm($form, $form_state);
   }
@@ -55,6 +80,15 @@ class ConfigForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
+    $config_text = $form_state->getValue('config') ?: 'attributes:';
+
+    try {
+      $form_state->set('config', Yaml::decode($config_text));
+    }
+    catch (InvalidDataTypeException $e) {
+      $form_state->setErrorByName('config', $e->getMessage());
+    }
+
     parent::validateForm($form, $form_state);
   }
 
@@ -62,14 +96,11 @@ class ConfigForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    parent::submitForm($form, $form_state);
-
-    $attributes_text = $form_state->getValue('attributes');
-    $attributes = menu_link_attributes_parse($attributes_text);
-
+    $config = $form_state->get('config');
     $this->config('menu_link_attributes.config')
-      ->set('attributes', $attributes)
+      ->setData($config)
       ->save();
+    parent::submitForm($form, $form_state);
   }
 
 }
