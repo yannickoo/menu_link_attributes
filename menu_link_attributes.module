@@ -67,12 +67,21 @@ function menu_link_attributes_form_menu_link_content_menu_link_content_form_alte
       $info['description'] = t('Enter value for <code>@attribute</code> attribute.', ['@attribute' => $attribute]);
     }
 
+    // Determine type based on options field.
+    $type = !empty($info['options']) ? 'select' : 'textfield';
+
     $form['attributes'][$attribute] = [
-      '#type' => 'textfield',
+      '#type' => $type,
       '#title' => $info['label'],
       '#description' => $info['description'],
       '#default_value' => isset($menu_link_attributes[$attribute]) ? $menu_link_attributes[$attribute] : '',
     ];
+
+    // Fill options if select list.
+    if ($type == 'select') {
+      $form['attributes'][$attribute]['#empty_option'] = '- ' . t('Select value') . ' -';
+      $form['attributes'][$attribute]['#options'] = $info['options'];
+    }
 
     // Add "autofocus" attribute for first attribute input field
     // if coming from config page.
