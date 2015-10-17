@@ -2,7 +2,6 @@ name: Menu Link Attributes
 type: module
 description: 'Allows you to add attributes to menu links.'
 core: 8.x
-package: Other
 dependencies:
   - menu_link_content
 configure: menu_link_attributes.config
