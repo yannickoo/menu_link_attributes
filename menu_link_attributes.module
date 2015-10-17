@@ -72,7 +72,7 @@ function menu_link_attributes_form_menu_link_content_form_alter(array &$form, Fo
 
     // Fill options if select list.
     if ($type == 'select') {
-      $form['options']['attributes'][$attribute]['#empty_option'] = '- ' . t('Select value') . ' -';
+      $form['options']['attributes'][$attribute]['#empty_option'] = t('- Select -');
       $form['options']['attributes'][$attribute]['#options'] = $info['options'];
     }
 
