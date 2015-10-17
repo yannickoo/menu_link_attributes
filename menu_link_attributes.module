@@ -119,6 +119,7 @@ function menu_link_attributes_preprocess_menu(&$variables) {
  * Get menu link attributes.
  *
  * @param \Drupal\Core\Menu\MenuLinkInterface $menu_link_content_plugin
+ *
  * @return array
  */
 function menu_link_attributes_get_attributes(MenuLinkInterface $menu_link_content_plugin) {
