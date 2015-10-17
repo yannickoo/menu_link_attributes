@@ -6,28 +6,21 @@
  */
 
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Component\Plugin\Exception\PluginNotFoundException;
 use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Url;
+use Drupal\Core\Menu\MenuLinkInterface;
+use Drupal\Component\Plugin\Exception\PluginNotFoundException;
 
 /**
- * Implements hook_form_FORM_ID_alter().
+ * Implements hook_form_BASE_FORM_ID_alter().
  */
-function menu_link_attributes_form_menu_link_content_menu_link_content_form_alter(&$form, FormStateInterface $form_state) {
+function menu_link_attributes_form_menu_link_content_form_alter(array &$form, FormStateInterface $form_state, $form_id) {
   $attributes = \Drupal::config('menu_link_attributes.config')->get('attributes') ?: [];
-  $menu_link_manager = \Drupal::service('plugin.manager.menu.link');
   $menu_link = $form_state->getFormObject()->getEntity();
-  $menu_link_attributes = [];
+  $menu_link_options = $menu_link->link->first()->options ?: [];
+  $menu_link_attributes = isset($menu_link_options['attributes']) ? $menu_link_options['attributes'] : [];
 
-  // Try to load plugin definition for getting attributes.
-  try {
-    $definition = $menu_link_manager->createInstance($menu_link->getPluginId());
-    $menu_link_options =  $definition->getOptions();
-    $menu_link_attributes = isset($menu_link_options['attributes']) ? $menu_link_options['attributes'] : [];
-  }
-  catch (PluginNotFoundException $e) {}
-
-  $form['attributes'] = [
+  $form['options']['attributes'] = [
     '#type' => 'details',
     '#title' => t('Attributes'),
     '#weight' => -2,
@@ -40,17 +33,17 @@ function menu_link_attributes_form_menu_link_content_menu_link_content_form_alte
 
   // Open <details> element if coming from config page.
   if ($coming_from_config) {
-    $form['attributes']['#open'] = TRUE;
+    $form['options']['attributes']['#open'] = TRUE;
   }
 
   $destination = \Drupal::destination()->getAsArray();
   $config_path = Url::fromRoute('menu_link_attributes.config', [], ['query' => $destination])->toString();
 
   if (count($attributes)) {
-    $form['attributes']['#description'] = '<small>' . t('Manage available attributes <a href="@config">here</a>.', ['@config' => $config_path]) . '</small>';
+    $form['options']['attributes']['#description'] = '<small>' . t('Manage available attributes <a href="@config">here</a>.', ['@config' => $config_path]) . '</small>';
   }
   else {
-    $form['attributes']['help'] = [
+    $form['options']['attributes']['help'] = [
       '#markup' => t('Manage available attributes <a href="@config">here</a>.', ['@config' => $config_path])
     ];
   }
@@ -70,7 +63,7 @@ function menu_link_attributes_form_menu_link_content_menu_link_content_form_alte
     // Determine type based on options field.
     $type = !empty($info['options']) ? 'select' : 'textfield';
 
-    $form['attributes'][$attribute] = [
+    $form['options']['attributes'][$attribute] = [
       '#type' => $type,
       '#title' => $info['label'],
       '#description' => $info['description'],
@@ -79,14 +72,14 @@ function menu_link_attributes_form_menu_link_content_menu_link_content_form_alte
 
     // Fill options if select list.
     if ($type == 'select') {
-      $form['attributes'][$attribute]['#empty_option'] = '- ' . t('Select value') . ' -';
-      $form['attributes'][$attribute]['#options'] = $info['options'];
+      $form['options']['attributes'][$attribute]['#empty_option'] = '- ' . t('Select value') . ' -';
+      $form['options']['attributes'][$attribute]['#options'] = $info['options'];
     }
 
     // Add "autofocus" attribute for first attribute input field
     // if coming from config page.
     if ($coming_from_config && !$autofocus) {
-      $form['attributes'][$attribute]['#attributes'] = ['autofocus' => 'autofocus'];
+      $form['options']['attributes'][$attribute]['#attributes'] = ['autofocus' => 'autofocus'];
       $autofocus = TRUE;
     }
   }
@@ -98,64 +91,59 @@ function menu_link_attributes_form_menu_link_content_menu_link_content_form_alte
  * Submit function for menu add / edit form.
  */
 function menu_link_attributes_menu_link_content_form_submit($form, FormStateInterface $form_state) {
-  $menu_link_manager = \Drupal::service('plugin.manager.menu.link');
   $menu_link = $form_state->getFormObject()->getEntity();
   $options = ['attributes' => $form_state->getValue('attributes')];
+  $menu_link_options = $menu_link->link->first()->options;
 
-  $menu_link_manager->updateDefinition($menu_link->getPluginId(), ['options' => $options]);
+  $menu_link->link->first()->options = array_merge($menu_link_options, $options);
+  $menu_link->save();
 }
 
 /**
- * Transform a text in attr|label|desc format into an array of attributes.
- *
- * @param string $attributes_text
- *   The attributes to be converted.
- * @return array
- *   The attributes as array.
+ * Implements hook_preprocess_menu().
  */
-function menu_link_attributes_parse($attributes_text) {
-  $lines = preg_split('/\n|\r/', $attributes_text, -1, PREG_SPLIT_NO_EMPTY);
-  $lines = array_map('trim', $lines);
-  $lines = array_filter($lines, 'strlen');
+function menu_link_attributes_preprocess_menu(&$variables) {
+  foreach ($variables['items'] as &$item) {
+    $menu_link_attributes = menu_link_attributes_get_attributes($item['original_link']);
+
+    if (count($menu_link_attributes)) {
+      $url_attributes = $item['url']->getOption('attributes') ?: [];
+      $attributes = array_merge($url_attributes, $menu_link_attributes);
+
+      $item['url']->setOption('attributes', $attributes);
+    }
+  }
+}
+
+/**
+ * Get menu link attributes.
+ *
+ * @param \Drupal\Core\Menu\MenuLinkInterface $menu_link_content_plugin
+ * @return array
+ */
+function menu_link_attributes_get_attributes(MenuLinkInterface $menu_link_content_plugin) {
   $attributes = [];
 
-  foreach ($lines as $line) {
-    if (preg_match('/^([^\s\|]+)(?:\|([^\|]+))?(?:\|(.*))?/', $line, $matches)) {
-      $attributes[$matches[1]] = [
-        'label' => isset($matches[2]) ? $matches[2] : '',
-        'description' => isset($matches[3]) ? $matches[3] : '',
-      ];
+  try {
+    $plugin_id = $menu_link_content_plugin->getPluginId();
+  }
+  catch (PluginNotFoundException $e) {
+    return $attributes;
+  }
+
+  list($entity_type, $uuid) = explode(':', $plugin_id, 2);
+  $entity = $uuid ? \Drupal::entityManager()->loadEntityByUuid($entity_type, $uuid) : NULL;
+
+  if ($entity) {
+    $options = $entity->link->first()->options;
+    $attributes = isset($options['attributes']) ? $options['attributes'] : [];
+
+    // Class attribute needs special handling because Drupal
+    // may add an "active" class to it.
+    if (isset($attributes['class'])) {
+      $attributes['class'] = explode(' ', $attributes['class']);
     }
   }
 
   return $attributes;
-}
-
-/**
- * Transform an array of attributes into a string.
- *
- * @param array $attributes
- *   The attributes to be converted.
- * @return string
- *   The attributes as string.
- */
-function menu_link_attributes_split($attributes) {
-  $attributes_text = '';
-
-  // Iterate all attributes and build string.
-  foreach ($attributes as $attribute => $info) {
-    $attributes_text .= $attribute;
-
-    if ($info['label']) {
-      $attributes_text .= '|' . $info['label'];
-    }
-
-    if ($info['description']) {
-      $attributes_text .= '|' . $info['description'];
-    }
-
-    $attributes_text .= "\n";
-  }
-
-  return $attributes_text;
 }
