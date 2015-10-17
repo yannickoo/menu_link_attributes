@@ -1,6 +1,6 @@
 name: Menu Link Attributes
 type: module
-description: Allows you to add attributes to menu links.
+description: 'Allows you to add attributes to menu links.'
 core: 8.x
 package: Other
 dependencies:
