@@ -141,7 +141,7 @@ function menu_link_attributes_get_attributes(MenuLinkInterface $menu_link_conten
 
   if ($entity) {
     $options = $entity->link->first()->options;
-    $attributes = isset($options['attributes']) ? $options['attributes'] : [];
+    $attributes = isset($options['attributes']) ? array_filter($options['attributes']) : [];
 
     // Class attribute needs special handling because Drupal
     // may add an "active" class to it.
