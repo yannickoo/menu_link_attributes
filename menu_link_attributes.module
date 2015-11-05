@@ -137,16 +137,19 @@ function menu_link_attributes_get_attributes(MenuLinkInterface $menu_link_conten
   }
 
   list($entity_type, $uuid) = explode(':', $plugin_id, 2);
-  $entity = \Drupal::entityManager()->loadEntityByUuid($entity_type, $uuid);
+  
+  if ($entity_type == 'menu_link_content') {
+    $entity = \Drupal::entityManager()->loadEntityByUuid($entity_type, $uuid);
 
-  if ($entity) {
-    $options = $entity->link->first()->options;
-    $attributes = isset($options['attributes']) ? array_filter($options['attributes']) : [];
+    if ($entity) {
+      $options = $entity->link->first()->options;
+      $attributes = isset($options['attributes']) ? $options['attributes'] : [];
 
-    // Class attribute needs special handling because Drupal
-    // may add an "active" class to it.
-    if (isset($attributes['class'])) {
-      $attributes['class'] = explode(' ', $attributes['class']);
+      // Class attribute needs special handling because Drupal
+      // may add an "active" class to it.
+      if (isset($attributes['class'])) {
+        $attributes['class'] = explode(' ', $attributes['class']);
+      }
     }
   }
 
