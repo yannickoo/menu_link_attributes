@@ -103,7 +103,17 @@ function menu_link_attributes_menu_link_content_form_submit($form, FormStateInte
  * Implements hook_preprocess_menu().
  */
 function menu_link_attributes_preprocess_menu(&$variables) {
-  foreach ($variables['items'] as &$item) {
+  menu_link_attibutes_set_attributes($variables['items']);
+}
+
+/**
+ * Set the attributes on the given items.
+ * @param $items
+ *   List of menu items.
+ */
+function menu_link_attibutes_set_attributes($items) {
+
+  foreach ($items as &$item) {
     $menu_link_attributes = menu_link_attributes_get_attributes($item['original_link']);
 
     if (count($menu_link_attributes)) {
@@ -111,8 +121,13 @@ function menu_link_attributes_preprocess_menu(&$variables) {
       $attributes = array_merge($url_attributes, $menu_link_attributes);
 
       $item['url']->setOption('attributes', $attributes);
+      if (!empty($item['below'])) {
+        menu_link_attibutes_set_attributes($item['below']);
+      }
+
     }
   }
+
 }
 
 /**
@@ -137,7 +152,7 @@ function menu_link_attributes_get_attributes(MenuLinkInterface $menu_link_conten
   }
 
   list($entity_type, $uuid) = explode(':', $plugin_id, 2);
-  
+
   if ($entity_type == 'menu_link_content') {
     $entity = \Drupal::entityManager()->loadEntityByUuid($entity_type, $uuid);
 
