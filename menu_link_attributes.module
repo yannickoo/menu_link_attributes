@@ -174,7 +174,7 @@ function menu_link_attributes_get_attributes(MenuLinkInterface $menu_link_conten
         }
       }
 
-    } catch(PluginNotfoundException $e) {
+    } catch (PluginNotfoundException $e) {
       // Make sure we catch failed entity loadings.
     }
   }
