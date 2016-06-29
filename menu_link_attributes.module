@@ -112,7 +112,6 @@ function menu_link_attributes_preprocess_menu(&$variables) {
  *   List of menu items.
  */
 function menu_link_attibutes_set_attributes($items) {
-
   foreach ($items as &$item) {
     $menu_link_attributes = menu_link_attributes_get_attributes($item['original_link']);
 
@@ -121,13 +120,12 @@ function menu_link_attibutes_set_attributes($items) {
       $attributes = array_merge($url_attributes, $menu_link_attributes);
 
       $item['url']->setOption('attributes', $attributes);
-      if (!empty($item['below'])) {
-        menu_link_attibutes_set_attributes($item['below']);
-      }
+    }
 
+    if (!empty($item['below'])) {
+      menu_link_attibutes_set_attributes($item['below']);
     }
   }
-
 }
 
 /**
