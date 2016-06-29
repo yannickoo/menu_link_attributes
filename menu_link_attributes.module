@@ -160,7 +160,7 @@ function menu_link_attributes_get_attributes(MenuLinkInterface $menu_link_conten
 
       // Class attribute needs special handling because Drupal
       // may add an "active" class to it.
-      if (isset($attributes['class'])) {
+      if (isset($attributes['class']) && !is_array($attributes['class'])) {
         $attributes['class'] = explode(' ', $attributes['class']);
       }
 
