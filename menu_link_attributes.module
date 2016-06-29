@@ -44,7 +44,7 @@ function menu_link_attributes_form_menu_link_content_form_alter(array &$form, Fo
   }
   else {
     $form['options']['attributes']['help'] = [
-      '#markup' => t('Manage available attributes <a href="@config">here</a>.', ['@config' => $config_path])
+      '#markup' => t('Manage available attributes <a href="@config">here</a>.', ['@config' => $config_path]),
     ];
   }
 
@@ -108,7 +108,8 @@ function menu_link_attributes_preprocess_menu(&$variables) {
 
 /**
  * Set the attributes on the given items.
- * @param $items
+ *
+ * @param array $items
  *   List of menu items.
  */
 function menu_link_attibutes_set_attributes($items) {
@@ -132,8 +133,10 @@ function menu_link_attibutes_set_attributes($items) {
  * Get menu link attributes.
  *
  * @param \Drupal\Core\Menu\MenuLinkInterface $menu_link_content_plugin
+ *   A menu link content plugin.
  *
  * @return array
+ *   An array with the attributes.
  */
 function menu_link_attributes_get_attributes(MenuLinkInterface $menu_link_content_plugin) {
   $attributes = [];
@@ -171,7 +174,9 @@ function menu_link_attributes_get_attributes(MenuLinkInterface $menu_link_conten
         }
       }
 
-    } catch(PluginNotfoundException $e) {}
+    } catch(PluginNotfoundException $e) {
+      // Make sure we catch failed entity loadings.
+    }
   }
 
   return $attributes;

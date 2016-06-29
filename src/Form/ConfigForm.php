@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\menu_link_attributes\Form\ConfigForm.
- */
-
 namespace Drupal\menu_link_attributes\Form;
 
 use Drupal\Core\Form\ConfigFormBase;
@@ -24,7 +19,7 @@ class ConfigForm extends ConfigFormBase {
    */
   protected function getEditableConfigNames() {
     return [
-      'menu_link_attributes.config'
+      'menu_link_attributes.config',
     ];
   }
 
@@ -72,7 +67,7 @@ class ConfigForm extends ConfigFormBase {
     $form['example']['description'] = [
       '#prefix' => '<p>',
       '#suffix' => '</p>',
-      '#markup' => $this->t('Each attribute has an optional label and description.')
+      '#markup' => $this->t('Each attribute has an optional label and description.'),
     ];
 
     $form['example']['code'] = [
