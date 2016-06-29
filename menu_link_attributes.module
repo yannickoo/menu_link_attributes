@@ -152,9 +152,9 @@ function menu_link_attributes_get_attributes(MenuLinkInterface $menu_link_conten
   list($entity_type, $uuid) = explode(':', $plugin_id, 2);
 
   if ($entity_type == 'menu_link_content') {
-    $entity = \Drupal::entityManager()->loadEntityByUuid($entity_type, $uuid);
+    try {
+      $entity = \Drupal::entityManager()->loadEntityByUuid($entity_type, $uuid);
 
-    if ($entity) {
       $options = $entity->link->first()->options;
       $attributes = isset($options['attributes']) ? $options['attributes'] : [];
 
@@ -163,7 +163,7 @@ function menu_link_attributes_get_attributes(MenuLinkInterface $menu_link_conten
       if (isset($attributes['class'])) {
         $attributes['class'] = explode(' ', $attributes['class']);
       }
-    }
+    } catch(PluginNotfoundException $e) {}
   }
 
   return $attributes;
