@@ -169,7 +169,7 @@ function menu_link_attributes_get_attributes(MenuLinkInterface $menu_link_conten
 
       // Remove empty attributes by checking their string length.
       foreach ($attributes as &$attribute) {
-        if (Unicode::strlen($attribute) === 0) {
+        if (!is_array($attribute) && Unicode::strlen($attribute) === 0) {
           unset($attribute);
         }
       }
