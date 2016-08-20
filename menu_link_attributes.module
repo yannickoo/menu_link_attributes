@@ -103,7 +103,7 @@ function menu_link_attributes_menu_link_content_form_submit($form, FormStateInte
  * Implements hook_preprocess_menu().
  */
 function menu_link_attributes_preprocess_menu(&$variables) {
-  menu_link_attibutes_set_attributes($variables['items']);
+  menu_link_attributes_set_attributes($variables['items']);
 }
 
 /**
@@ -112,7 +112,7 @@ function menu_link_attributes_preprocess_menu(&$variables) {
  * @param array $items
  *   List of menu items.
  */
-function menu_link_attibutes_set_attributes($items) {
+function menu_link_attributes_set_attributes($items) {
   foreach ($items as &$item) {
     $menu_link_attributes = menu_link_attributes_get_attributes($item['original_link']);
 
@@ -124,7 +124,7 @@ function menu_link_attibutes_set_attributes($items) {
     }
 
     if (!empty($item['below'])) {
-      menu_link_attibutes_set_attributes($item['below']);
+      menu_link_attributes_set_attributes($item['below']);
     }
   }
 }
