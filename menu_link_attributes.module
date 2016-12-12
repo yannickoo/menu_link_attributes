@@ -120,6 +120,13 @@ function menu_link_attributes_set_attributes($items) {
       $url_attributes = $item['url']->getOption('attributes') ?: [];
       $attributes = array_merge($url_attributes, $menu_link_attributes);
 
+      // Remove empty attributes by checking their string length.
+      foreach ($attributes as $key => $attribute) {
+        if (!is_array($attribute) && Unicode::strlen($attribute) === 0) {
+          unset($attributes[$key]);
+        }
+      }
+
       $item['url']->setOption('attributes', $attributes);
     }
 
@@ -165,13 +172,6 @@ function menu_link_attributes_get_attributes(MenuLinkInterface $menu_link_conten
       // may add an "active" class to it.
       if (isset($attributes['class']) && !is_array($attributes['class'])) {
         $attributes['class'] = explode(' ', $attributes['class']);
-      }
-
-      // Remove empty attributes by checking their string length.
-      foreach ($attributes as &$attribute) {
-        if (!is_array($attribute) && Unicode::strlen($attribute) === 0) {
-          unset($attribute);
-        }
       }
 
     } catch (PluginNotfoundException $e) {
