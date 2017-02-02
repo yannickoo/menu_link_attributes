@@ -153,6 +153,7 @@ function menu_link_attributes_get_attributes(MenuLinkInterface $menu_link_conten
   }
 
   list($entity_type, $uuid) = explode(':', $plugin_id, 2);
+  $uuid = strstr($uuid, ':', true);
 
   if ($entity_type == 'menu_link_content') {
     try {
