@@ -54,7 +54,12 @@ function menu_link_attributes_form_menu_link_content_form_alter(array &$form, Fo
     }
 
     // Determine type based on options field.
-    $type = !empty($info['options']) ? 'select' : 'textfield';
+    if (empty($info['type'])) {
+      $type = !empty($info['options']) ? 'select' : 'textfield';
+    }
+    else {
+      $type = $info['type'];
+    }
 
     $form['options']['attributes'][$attribute] = [
       '#type' => $type,
