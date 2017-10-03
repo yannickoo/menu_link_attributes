@@ -1,15 +1,8 @@
 <?php
 
-/**
- * @file
- * Main file of Menu Link Attributes module.
- */
-
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Url;
-use Drupal\Core\Menu\MenuLinkInterface;
-use Drupal\Component\Plugin\Exception\PluginNotFoundException;
 
 /**
  * Implements hook_form_BASE_FORM_ID_alter().
@@ -91,10 +84,15 @@ function menu_link_attributes_form_menu_link_content_form_alter(array &$form, Fo
  * Submit function for menu add / edit form.
  */
 function menu_link_attributes_menu_link_content_form_submit($form, FormStateInterface $form_state) {
-  $menu_link = $form_state->getFormObject()->getEntity();
+  /** @var \Drupal\menu_link_content\Form\MenuLinkContentForm $form_object */
+  $form_object = $form_state->getFormObject();
+  $menu_link = $form_object->getEntity();
   $options = ['attributes' => $form_state->getValue('attributes')];
   $menu_link_options = $menu_link->link->first()->options;
+  $merged_options = array_merge($menu_link_options, $options);
+  // Filter empty attributes.
+  $merged_options['attributes'] = array_filter($merged_options['attributes']);
 
-  $menu_link->link->first()->options = array_merge($menu_link_options, $options);
+  $menu_link->link->first()->options = $merged_options;
   $menu_link->save();
 }
