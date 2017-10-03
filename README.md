@@ -7,6 +7,7 @@
 1. Install the module the [drupal way](https://www.drupal.org/documentation/install/modules-themes/modules-8)
 2. Edit a menu item and edit attributes
 3. Add more attributes if needed on configuration page
+4. Grant *Administer menu link attributes* permission to users which should be able to edit menu link attributes
 
 ## Contributing
 

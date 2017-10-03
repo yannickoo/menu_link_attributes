@@ -8,15 +8,20 @@ use Drupal\Core\Url;
  * Implements hook_form_BASE_FORM_ID_alter().
  */
 function menu_link_attributes_form_menu_link_content_form_alter(array &$form, FormStateInterface $form_state, $form_id) {
+  $account = \Drupal::currentUser();
   $attributes = \Drupal::config('menu_link_attributes.config')->get('attributes') ?: [];
   $menu_link = $form_state->getFormObject()->getEntity();
   $menu_link_options = $menu_link->link ? $menu_link->link->first()->options : [];
   $menu_link_attributes = isset($menu_link_options['attributes']) ? $menu_link_options['attributes'] : [];
 
+  if (!$account->hasPermission('use menu link attributes')) {
+    return;
+  }
+
   $form['options']['attributes'] = [
     '#type' => 'details',
     '#title' => t('Link attributes'),
-    '#weight' => -2,
+    '#weight' => -3,
     '#tree' => TRUE,
   ];
 
@@ -24,7 +29,7 @@ function menu_link_attributes_form_menu_link_content_form_alter(array &$form, Fo
     '#type' => 'details',
     '#title' => t('Container attributes'),
     '#description' => t('These attributes are applied to the container element (<code>&lt;li&gt;</code>) of the menu link.'),
-    '#weight' => -3,
+    '#weight' => -2,
     '#tree' => TRUE,
     '#access' => FALSE,
   ];
@@ -41,13 +46,15 @@ function menu_link_attributes_form_menu_link_content_form_alter(array &$form, Fo
   $destination = \Drupal::destination()->getAsArray();
   $config_path = Url::fromRoute('menu_link_attributes.config', [], ['query' => $destination])->toString();
 
-  if (count($attributes)) {
-    $form['options']['attributes']['#description'] = '<small>' . t('Manage available attributes <a href="@config">here</a>.', ['@config' => $config_path]) . '</small>';
-  }
-  else {
-    $form['options']['attributes']['help'] = [
-      '#markup' => t('Manage available attributes <a href="@config">here</a>.', ['@config' => $config_path]),
-    ];
+  if ($account->hasPermission('administer menu link attributes')) {
+    if (count($attributes)) {
+      $form['options']['attributes']['#description'] = '<small>' . t('Manage available attributes <a href="@config">here</a>.', ['@config' => $config_path]) . '</small>';
+    }
+    else {
+      $form['options']['attributes']['help'] = [
+        '#markup' => t('Manage available attributes <a href="@config">here</a>.', ['@config' => $config_path]),
+      ];
+    }
   }
 
   $autofocus = FALSE;
