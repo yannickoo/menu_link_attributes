@@ -10,7 +10,7 @@ use Drupal\Core\Url;
 function menu_link_attributes_form_menu_link_content_form_alter(array &$form, FormStateInterface $form_state, $form_id) {
   $attributes = \Drupal::config('menu_link_attributes.config')->get('attributes') ?: [];
   $menu_link = $form_state->getFormObject()->getEntity();
-  $menu_link_options = $menu_link->link->first()->options ?: [];
+  $menu_link_options = $menu_link->link ? $menu_link->link->first()->options : [];
   $menu_link_attributes = isset($menu_link_options['attributes']) ? $menu_link_options['attributes'] : [];
 
   $form['options']['attributes'] = [
