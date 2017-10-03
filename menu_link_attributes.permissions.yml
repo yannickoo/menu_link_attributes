@@ -1,0 +1,7 @@
+administer menu link attributes:
+  title: 'Administer menu link attributes'
+  description: 'Provides administrative capabilities for configuring and complete use of Menu Link Attributes.'
+  restrict access: true
+use menu link attributes:
+  title: 'Allows use of menu link attributes'
+  description: 'Allows for the use of menu link attribute selection within the menu link create or edit forms.'
