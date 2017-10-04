@@ -122,17 +122,28 @@ function menu_link_attributes_menu_link_content_form_submit($form, FormStateInte
   /** @var \Drupal\menu_link_content\Form\MenuLinkContentForm $form_object */
   $form_object = $form_state->getFormObject();
   $menu_link = $form_object->getEntity();
-  $menu_link_options = $menu_link->link->first()->options;
+
+  if (!$menu_link->link) {
+    return;
+  }
+
+  $menu_link_options = $menu_link->link->first()->options ?: [];
 
   foreach (['attributes', 'container_attributes'] as $attributes_key) {
     $options = [$attributes_key => $form_state->getValue($attributes_key)];
     $merged_options = array_merge($menu_link_options, $options);
     // Filter empty attributes.
-    $menu_link_options[$attributes_key] = array_filter($merged_options[$attributes_key]);
+    $attributes = array_filter($merged_options[$attributes_key]);
+
+    if (count($attributes)) {
+      $menu_link_options[$attributes_key] = $attributes;
+    }
   }
 
-  $menu_link->link->first()->options = array_filter($menu_link_options);
-  $menu_link->save();
+  if (count($menu_link_options)) {
+    $menu_link->link->first()->options = $menu_link_options;
+    $menu_link->save();
+  }
 }
 
 /**
