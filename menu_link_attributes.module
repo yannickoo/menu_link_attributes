@@ -19,7 +19,7 @@ function menu_link_attributes_form_menu_link_content_form_alter(array &$form, Fo
 
   $form['options']['attributes'] = [
     '#type' => 'details',
-    '#title' => t('Link attributes'),
+    '#title' => t('Attributes'),
     '#weight' => -3,
     '#tree' => TRUE,
   ];
@@ -60,26 +60,22 @@ function menu_link_attributes_form_menu_link_content_form_alter(array &$form, Fo
 
   // Iterate all defined attributes and create text field for them.
   foreach ($attributes as $attribute => $info) {
+    $is_container_attribute = menu_link_attributes_is_container_attribute($attribute);
+    $attribute_formatted = $attribute;
     $attributes_key = 'attributes';
-    $possible_container_attribute = strpos($attribute, 'container_') === 0;
-    $disabled_container = isset($info['container']) && !$info['container'];
-    $possible_container_attribute = $possible_container_attribute && !$disabled_container;
-    $container_attribute_enabled = isset($info['container']) && $info['container'];
 
-    if ($possible_container_attribute || $container_attribute_enabled) {
+    if ($is_container_attribute) {
       $attributes_key = 'container_attributes';
-      $form['options']['container_attributes']['#access'] = TRUE;
-
-      $attribute = preg_replace('/^container_/', '', $attribute);
+      $attribute_formatted = preg_replace('/^container_/', '', $attribute);
     }
 
     // Provide default label / description for attributes.
     if (empty($info['label'])) {
-      $info['label'] = str_replace('-', ' ', Unicode::ucfirst($attribute));
+      $info['label'] = str_replace('-', ' ', Unicode::ucfirst($attribute_formatted));
     }
 
     if (empty($info['description'])) {
-      $info['description'] = t('Enter value for <code>@attribute</code> attribute.', ['@attribute' => $attribute]);
+      $info['description'] = t('Enter value for <code>@attribute</code> attribute.', ['@attribute' => $attribute_formatted]);
     }
 
     // Determine type based on options field.
@@ -90,7 +86,7 @@ function menu_link_attributes_form_menu_link_content_form_alter(array &$form, Fo
       $type = $info['type'];
     }
 
-    $form['options'][$attributes_key][$attribute] = [
+    $form['options']['attributes'][$attribute] = [
       '#type' => $type,
       '#title' => $info['label'],
       '#description' => $info['description'],
@@ -99,14 +95,14 @@ function menu_link_attributes_form_menu_link_content_form_alter(array &$form, Fo
 
     // Fill options if select list.
     if ($type == 'select') {
-      $form['options'][$attributes_key][$attribute]['#empty_option'] = t('- Select -');
-      $form['options'][$attributes_key][$attribute]['#options'] = $info['options'];
+      $form['options']['attributes'][$attribute]['#empty_option'] = t('- Select -');
+      $form['options']['attributes'][$attribute]['#options'] = $info['options'];
     }
 
     // Add "autofocus" attribute for first attribute input field
     // if coming from config page.
     if ($coming_from_config && !$autofocus) {
-      $form['options'][$attributes_key][$attribute]['#attributes'] = ['autofocus' => 'autofocus'];
+      $form['options']['attributes'][$attribute]['#attributes'] = ['autofocus' => 'autofocus'];
       $autofocus = TRUE;
     }
   }
@@ -126,23 +122,52 @@ function menu_link_attributes_menu_link_content_form_submit($form, FormStateInte
     return;
   }
 
+
   $menu_link_options = $menu_link->link->first()->options ?: [];
+  $menu_link_attributes = ['attributes' => $form_state->getValue('attributes')];
 
-  foreach (['attributes', 'container_attributes'] as $attributes_key) {
-    $options = [$attributes_key => $form_state->getValue($attributes_key)];
-    $merged_options = array_merge($menu_link_options, $options);
-    // Filter empty attributes.
-    $attributes = array_filter($merged_options[$attributes_key]);
+  foreach ($menu_link_attributes['attributes'] as $attribute_name => $attribute_value) {
+    $is_container_attribute = menu_link_attributes_is_container_attribute($attribute_name);
 
-    if (count($attributes)) {
-      $menu_link_options[$attributes_key] = $attributes;
+    if ($is_container_attribute) {
+      unset($menu_link_attributes['attributes'][$attribute_name]);
+
+      $attribute_name = preg_replace('/^container_/', '', $attribute_name);
+      $menu_link_attributes['container_attributes'][$attribute_name] = $attribute_value;
     }
   }
 
-  if (count($menu_link_options)) {
+  foreach ($menu_link_attributes as $attribute_group => $attributes) {
+    $menu_link_attributes[$attribute_group] = array_filter($attributes);
+  }
+
+  $menu_link_attributes = array_filter($menu_link_attributes);
+  $menu_link_options = array_merge($menu_link_options, $menu_link_attributes);
+
+  if (count($menu_link_attributes)) {
     $menu_link->link->first()->options = $menu_link_options;
     $menu_link->save();
   }
+}
+
+/**
+ * Helper function to determine if attribute is a container attribute.
+ *
+ * @param string $attribute_name
+ *   The name of the attribute.
+ *
+ * @return bool
+ */
+function menu_link_attributes_is_container_attribute($attribute_name) {
+  $attributes = \Drupal::config('menu_link_attributes.config')->get('attributes') ?: [];
+  $info = $attributes[$attribute_name];
+  $possible_container_attribute = strpos($attribute_name, 'container_') === 0;
+  $disabled_container = isset($info['container']) && !$info['container'];
+  $possible_container_attribute = $possible_container_attribute && !$disabled_container;
+  $container_attribute_enabled = isset($info['container']) && $info['container'];
+  $is_container_attribute = $possible_container_attribute || $container_attribute_enabled;
+
+  return $is_container_attribute;
 }
 
 /**
