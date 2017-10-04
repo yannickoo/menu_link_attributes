@@ -90,7 +90,7 @@ function menu_link_attributes_form_menu_link_content_form_alter(array &$form, Fo
       '#type' => $type,
       '#title' => $info['label'],
       '#description' => $info['description'],
-      '#default_value' => isset($menu_link_options[$attributes_key][$attribute]) ? $menu_link_options[$attributes_key][$attribute] : '',
+      '#default_value' => isset($menu_link_options[$attributes_key][$attribute_formatted]) ? $menu_link_options[$attributes_key][$attribute_formatted] : '',
     ];
 
     // Fill options if select list.
