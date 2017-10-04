@@ -12,7 +12,6 @@ function menu_link_attributes_form_menu_link_content_form_alter(array &$form, Fo
   $attributes = \Drupal::config('menu_link_attributes.config')->get('attributes') ?: [];
   $menu_link = $form_state->getFormObject()->getEntity();
   $menu_link_options = $menu_link->link ? $menu_link->link->first()->options : [];
-  $menu_link_attributes = isset($menu_link_options['attributes']) ? $menu_link_options['attributes'] : [];
 
   if (!$account->hasPermission('use menu link attributes')) {
     return;
@@ -95,7 +94,7 @@ function menu_link_attributes_form_menu_link_content_form_alter(array &$form, Fo
       '#type' => $type,
       '#title' => $info['label'],
       '#description' => $info['description'],
-      '#default_value' => isset($menu_link_attributes[$attribute]) ? $menu_link_attributes[$attribute] : '',
+      '#default_value' => isset($menu_link_options[$attributes_key][$attribute]) ? $menu_link_options[$attributes_key][$attribute] : '',
     ];
 
     // Fill options if select list.
