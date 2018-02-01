@@ -1,0 +1,33 @@
+menu_link_attributes.config:
+  type: config_entity
+  mapping:
+    attributes:
+      type: mapping
+      mapping:
+        class:
+          type: mapping
+          mapping:
+            label:
+              type: string
+              label: 'Label'
+            description:
+              type: string
+              label: 'Description'
+        target:
+          type: mapping
+          mapping:
+            label:
+              type: string
+              label: 'Label'
+            description:
+              type: string
+              label: 'Description'
+            options:
+              type: mapping
+              mapping:
+                _blank:
+                  type: string
+                  label: 'New window (_blank)'
+                _self:
+                  type: string
+                  label: 'Same window (_self)'
