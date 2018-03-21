@@ -138,7 +138,10 @@ function menu_link_attributes_menu_link_content_form_submit($form, FormStateInte
   }
 
   foreach ($menu_link_attributes as $attribute_group => $attributes) {
-    $menu_link_attributes[$attribute_group] = array_filter($attributes);
+   if ($attributes['target'] === "") {
+    unset($attributes['target']);
+   } 
+   $menu_link_attributes[$attribute_group] = array_filter($attributes);
   }
 
   $menu_link_attributes = array_filter($menu_link_attributes);
