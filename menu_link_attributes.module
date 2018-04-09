@@ -183,7 +183,7 @@ function menu_link_attributes_preprocess_menu(&$variables) {
 function _menu_link_attributes_preprocess_menu_items(&$items) {
   foreach ($items as $item) {
     /** @var \Drupal\Core\Menu\MenuLinkDefault $menu_link */
-    $menu_link = isset($item['original_link']) ? $item['original_link'] ; NULL;
+    $menu_link = isset($item['original_link']) ? $item['original_link'] : NULL;
     $options = !empty($menu_link) ? $menu_link->getOptions() : NULL;
 
     // Apply container attributes on <li> element.
