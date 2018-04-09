@@ -174,16 +174,26 @@ function menu_link_attributes_is_container_attribute($attribute_name) {
  * Implements template_preprocess_menu().
  */
 function menu_link_attributes_preprocess_menu(&$variables) {
-  foreach ($variables['items'] as $item) {
+  _menu_link_attributes_preprocess_menu_items($variables['items']);
+}
+
+/**
+ * Helper function to recursively set list item attributes.
+ */
+function _menu_link_attributes_preprocess_menu_items(&$items) {
+  foreach ($items as $item) {
     /** @var \Drupal\Core\Menu\MenuLinkDefault $menu_link */
-    $menu_link = $item['original_link'];
-    $options = $menu_link->getOptions();
+    $menu_link = isset($item['original_link']) ? $item['original_link'] ? NULL;
+    $options = !empty($menu_link) ? $menu_link->getOptions() : NULL;
 
     // Apply container attributes on <li> element.
     if ($options && isset($options['container_attributes'])) {
       foreach ($options['container_attributes'] as $attribute => $value) {
         $item['attributes']->setAttribute($attribute, $value);
       }
+    }
+    if (!empty($item['below'])) {
+      _menu_link_attributes_preprocess_menu_items($item['below']);
     }
   }
 }
