@@ -122,9 +122,15 @@ function menu_link_attributes_menu_link_content_form_submit($form, FormStateInte
     return;
   }
 
-
   $menu_link_options = $menu_link->link->first()->options ?: [];
-  $menu_link_attributes = ['attributes' => $form_state->getValue('attributes')];
+  $menu_link_attributes = [];
+
+  foreach ($form_state->getValue('attributes') as $attribute_name => $value) {
+    if ($attribute_name == 'target') {
+      continue;
+    }
+    $menu_link_attributes['attributes'][$attribute_name] = explode(" ", $value);
+  }
 
   foreach ($menu_link_attributes['attributes'] as $attribute_name => $attribute_value) {
     $is_container_attribute = menu_link_attributes_is_container_attribute($attribute_name);
