@@ -21,3 +21,5 @@ _menu_link_attributes.attribute:
         type: sequence
         sequence:
           type: string
+      default_value:
+        type: string

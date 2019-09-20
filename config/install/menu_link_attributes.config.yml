@@ -8,3 +8,4 @@ attributes:
     options:
       _blank: 'New window (_blank)'
       _self: 'Same window (_self)'
+    default_value: ''
