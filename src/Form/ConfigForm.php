@@ -6,6 +6,7 @@ use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Component\Serialization\Exception\InvalidDataTypeException;
 use Drupal\Component\Serialization\Yaml;
+use Drupal\Core\Messenger\MessengerInterface;
 
 /**
  * Class ConfigForm.
@@ -43,8 +44,7 @@ class ConfigForm extends ConfigFormBase {
       $message = $this->t('It is recommended to install the <a href="@yaml-editor">YAML Editor</a> module for easier editing.', [
         '@yaml-editor' => 'https://www.drupal.org/project/yaml_editor',
       ]);
-
-      drupal_set_message($message, 'warning');
+      \Drupal::messenger()->addWarning($message);
     }
 
     $form['config'] = array(
