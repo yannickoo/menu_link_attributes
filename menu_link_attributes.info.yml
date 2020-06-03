@@ -4,5 +4,5 @@ description: 'Allows you to add attributes to menu links.'
 core: 8.x
 core_version_requirement: ^8 || ^9
 dependencies:
-  - menu_link_content
+  - drupal:menu_link_content
 configure: menu_link_attributes.config
