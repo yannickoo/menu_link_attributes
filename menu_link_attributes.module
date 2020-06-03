@@ -14,6 +14,8 @@ function menu_link_attributes_form_menu_link_content_form_alter(array &$form, Fo
   $menu_link_options = $menu_link->link ? $menu_link->link->first()->options : [];
 
   if (!$account->hasPermission('use menu link attributes')) {
+    $form_state->set('menu_link_options', $menu_link_options);
+    $form['actions']['submit']['#submit'][] = 'menu_link_attributes_menu_link_content_form_preserve';
     return;
   }
 
@@ -151,6 +153,27 @@ function menu_link_attributes_menu_link_content_form_submit($form, FormStateInte
 }
 
 /**
+ * Preserve menu link attributes on form submit,
+ * for users that don't have permissions to edit attributes.
+ */
+function menu_link_attributes_menu_link_content_form_preserve($form, FormStateInterface $form_state) {
+  /** @var \Drupal\menu_link_content\Form\MenuLinkContentForm $form_object */
+  $form_object = $form_state->getFormObject();
+  $menu_link = $form_object->getEntity();
+
+  if (!$menu_link->link) {
+    return;
+  }
+
+  $menu_link_options = $form_state->get('menu_link_options');
+
+  if (!empty($menu_link_options)) {
+    $menu_link->link->options = $menu_link_options;
+    $menu_link->save();
+  }
+}
+
+/**
  * Helper function to determine if attribute is a container attribute.
  *
  * @param string $attribute_name
@@ -197,3 +220,4 @@ function _menu_link_attributes_preprocess_menu_items(&$items) {
     }
   }
 }
+
