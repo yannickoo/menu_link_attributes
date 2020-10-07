@@ -101,6 +101,11 @@ function menu_link_attributes_form_menu_link_content_form_alter(array &$form, Fo
       $form['options']['attributes'][$attribute]['#options'] = $info['options'];
     }
 
+    // Fill options if type is "managed_file".
+    if ($type === 'managed_file' && !empty($info['upload_location'])) {
+      $form['options']['attributes'][$attribute]['#upload_location'] = $info['upload_location'];
+    }
+
     // Add "autofocus" attribute for first attribute input field
     // if coming from config page.
     if ($coming_from_config && !$autofocus) {
