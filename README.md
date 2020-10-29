@@ -16,6 +16,24 @@ In order to provide attributes for the wrapping `<li>` element you can either:
 * Create an attribute starting with `container_`, those will be used as container attribute automatically
 * Create an attribute and set `container: true`
 
+### Create MenuLinkContent with attributes programmaticly
+
+Here is an example :
+
+```
+$menu_link = MenuLinkContent::create([
+  'title' => $name,
+  'link' => [
+    'uri' => $option['link'],
+    'options' => [
+      'attributes' => [
+        'class' => $option['options']['attributes']['class'],
+      ],
+    ],
+  ],
+]);
+```
+
 ## Contributing
 
 Pull requests and stars are always welcome. For bugs and feature requests, [please create an issue](https://github.com/yannickoo/menu_link_attributes/issues/new).
