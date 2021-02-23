@@ -1,3 +1,7 @@
+#### :warning: The repository has been moved to [drupal.org](https://www.drupal.org/project/menu_link_attributes) / Issues can be created [here](https://www.drupal.org/node/add/project-issue/menu_link_attributes) :warning:
+
+---
+
 # Menu Link Attributes
 
 > Allows you to add attributes to your menu links.
@@ -18,4 +22,4 @@ In order to provide attributes for the wrapping `<li>` element you can either:
 
 ## Contributing
 
-Pull requests and stars are always welcome. For bugs and feature requests, [please create an issue](https://github.com/yannickoo/menu_link_attributes/issues/new).
+Pull requests and stars are always welcome. For bugs and feature requests, [please create an issue](https://www.drupal.org/node/add/project-issue/menu_link_attributes).
